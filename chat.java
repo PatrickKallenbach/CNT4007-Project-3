@@ -20,27 +20,20 @@ public class chat {
 			int peerPort = Integer.parseInt(bufferedReader.readLine());
 
 			peerSocket = new Socket("localhost", peerPort);
-			
+
 			try {
 				new Handler(listener.accept()).start();
-				System.out.println("Connected to peer!");
+				System.out.println("Connected to peer! Start chatting");
 
 				ObjectOutputStream out = new ObjectOutputStream(peerSocket.getOutputStream());
 				out.flush();
-				ObjectInputStream in = new ObjectInputStream(peerSocket.getInputStream());
 				
 				String message;
 				while (true) {
-					System.out.print("Hello, please input a sentence: ");
 					//read a sentence from the standard input
 					message = bufferedReader.readLine();
 					//Send the sentence to the server
 					sendMessage(message, out);
-					//Receive the upperCase sentence from the server
-					String MESSAGE = (String)in.readObject();
-					//show the message to the user
-					System.out.println("Receive message: " + MESSAGE);
-			
 				}
 			} finally {
 				listener.close();
@@ -56,22 +49,16 @@ public class chat {
      	*/
     	private static class Handler extends Thread {
         	private String message;    //message received from the client
-		private String MESSAGE;    //uppercase message send to the client
 		private Socket connection;
         	private ObjectInputStream in;	//stream read from the socket
-        	private ObjectOutputStream out;    //stream write to the socket
-		private int no = 1; 		//The index number of the client
 
         	public Handler(Socket connection) {
             		this.connection = connection;
-	    		this.no = no;
         	}
 
         public void run() {
  		try{
 			//initialize Input and Output streams
-			out = new ObjectOutputStream(connection.getOutputStream());
-			out.flush();
 			in = new ObjectInputStream(connection.getInputStream());
 			try{
 				while(true)
@@ -79,11 +66,7 @@ public class chat {
 					//receive the message sent from the client
 					message = (String)in.readObject();
 					//show the message to the user
-					System.out.println("Receive message: " + message + " from client " + no);
-					//Capitalize all letters in the message
-					MESSAGE = message.toUpperCase();
-					//send MESSAGE back to the client
-					sendMessage(MESSAGE, out);
+					System.out.println("Chat: " + message);
 				}
 			}
 			catch(ClassNotFoundException classnot){
@@ -91,17 +74,16 @@ public class chat {
 				}
 		}
 		catch(IOException ioException){
-			System.out.println("Disconnect with Client " + no);
+			System.out.println("Disconnect with Peer");
 		}
 		finally{
 			//Close connections
 			try{
 				in.close();
-				out.close();
 				connection.close();
 			}
 			catch(IOException ioException){
-				System.out.println("Disconnect with Client " + no);
+				System.out.println("Disconnect with Peer");
 			}
 		}
 	}
@@ -114,7 +96,6 @@ public class chat {
 		try{
 			out.writeObject(msg);
 			out.flush();
-			System.out.println("Send message: " + msg + " to Client");
 		}
 		catch(IOException ioException){
 			ioException.printStackTrace();
