@@ -23,7 +23,6 @@ public class chat {
 
 			try {
 				new Handler(listener.accept()).start();
-				System.out.println("Connected to peer! Start chatting");
 
 				ObjectOutputStream out = new ObjectOutputStream(peerSocket.getOutputStream());
 				out.flush();
@@ -66,7 +65,7 @@ public class chat {
 					//receive the message sent from the client
 					message = (String)in.readObject();
 					//show the message to the user
-					System.out.println("Chat: " + message);
+					System.out.println(message);
 				}
 			}
 			catch(ClassNotFoundException classnot){
