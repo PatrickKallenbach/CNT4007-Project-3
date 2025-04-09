@@ -4,26 +4,31 @@ import java.nio.*;
 import java.nio.channels.*;
 import java.util.*;
 
+// Patrick Kallenbach - CNT4007 Project 3
+
 public class chat {
+	private static final int sPort = 8000;   //The server will be listening on this port number
 
 	public static void main(String[] args) throws Exception {
 		if (args.length == 0) {
-			System.out.println("Please enter a port number");
+			System.out.println("Please input a port number.");
 		}
 		else {
-			BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(System.in));
-
-			String request = bufferedReader.readLine();
-			int port = Integer.parseInt(args[0]);
-        	ServerSocket listener = new ServerSocket(port);
-        	try {
-                new Handler(listener.accept(),1).start();
-            }
-        	finally {
-            	listener.close();
-        	} 
+			System.out.println("The server is running."); 
+				ServerSocket listener = new ServerSocket(sPort);
+			int clientNum = 1;
+				try {
+						while(true) {
+							new Handler(listener.accept(),clientNum).start();
+					System.out.println("Client "  + clientNum + " is connected!");
+					clientNum++;
+							}
+				} finally {
+						listener.close();
+				} 
 		}
-    }
+ 
+    	}
 
 	/**
      	* A handler thread class.  Handlers are spawned from the listening
