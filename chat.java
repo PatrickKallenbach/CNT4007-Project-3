@@ -15,22 +15,36 @@ public class chat {
 		else {
 			int port = Integer.parseInt(args[0]);
 			ServerSocket listener = new ServerSocket(port);
-			try {
-				BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(System.in));
-				int peerPort = Integer.parseInt(bufferedReader.readLine());
+			Socket peerSocket;
+			BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(System.in));
+			int peerPort = Integer.parseInt(bufferedReader.readLine());
 
-				Socket peerSocket = new Socket("localhost", peerPort);
+			peerSocket = new Socket("localhost", peerPort);
+			
+			try {
 				new Handler(listener.accept()).start();
 				System.out.println("Connected to peer!");
+
+				ObjectOutputStream out = new ObjectOutputStream(peerSocket.getOutputStream());
+				out.flush();
+				ObjectInputStream in = new ObjectInputStream(peerSocket.getInputStream());
 				
 				String message;
 				while (true) {
+					System.out.print("Hello, please input a sentence: ");
+					//read a sentence from the standard input
 					message = bufferedReader.readLine();
-
-					System.out.println(message);
+					//Send the sentence to the server
+					sendMessage(message, out);
+					//Receive the upperCase sentence from the server
+					String MESSAGE = (String)in.readObject();
+					//show the message to the user
+					System.out.println("Receive message: " + MESSAGE);
+			
 				}
 			} finally {
 				listener.close();
+				peerSocket.close();
 			} 
 		}
 
@@ -69,7 +83,7 @@ public class chat {
 					//Capitalize all letters in the message
 					MESSAGE = message.toUpperCase();
 					//send MESSAGE back to the client
-					sendMessage(MESSAGE);
+					sendMessage(MESSAGE, out);
 				}
 			}
 			catch(ClassNotFoundException classnot){
@@ -92,19 +106,19 @@ public class chat {
 		}
 	}
 
+
+    }
 	//send a message to the output stream
-	public void sendMessage(String msg)
+	public static void sendMessage(String msg, ObjectOutputStream out)
 	{
 		try{
 			out.writeObject(msg);
 			out.flush();
-			System.out.println("Send message: " + msg + " to Client " + no);
+			System.out.println("Send message: " + msg + " to Client");
 		}
 		catch(IOException ioException){
 			ioException.printStackTrace();
 		}
 	}
-
-    }
 
 }
