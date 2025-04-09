@@ -7,28 +7,34 @@ import java.util.*;
 // Patrick Kallenbach - CNT4007 Project 3
 
 public class chat {
-	private static final int sPort = 8000;   //The server will be listening on this port number
 
 	public static void main(String[] args) throws Exception {
 		if (args.length == 0) {
 			System.out.println("Please input a port number.");
 		}
 		else {
-			System.out.println("The server is running."); 
-				ServerSocket listener = new ServerSocket(sPort);
-			int clientNum = 1;
-				try {
-						while(true) {
-							new Handler(listener.accept(),clientNum).start();
-					System.out.println("Client "  + clientNum + " is connected!");
-					clientNum++;
-							}
-				} finally {
-						listener.close();
-				} 
+			int port = Integer.parseInt(args[0]);
+			ServerSocket listener = new ServerSocket(port);
+			try {
+				BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(System.in));
+				int peerPort = Integer.parseInt(bufferedReader.readLine());
+
+				Socket peerSocket = new Socket("localhost", peerPort);
+				new Handler(listener.accept()).start();
+				System.out.println("Connected to peer!");
+				
+				String message;
+				while (true) {
+					message = bufferedReader.readLine();
+
+					System.out.println(message);
+				}
+			} finally {
+				listener.close();
+			} 
 		}
- 
-    	}
+
+	}
 
 	/**
      	* A handler thread class.  Handlers are spawned from the listening
@@ -40,9 +46,9 @@ public class chat {
 		private Socket connection;
         	private ObjectInputStream in;	//stream read from the socket
         	private ObjectOutputStream out;    //stream write to the socket
-		private int no;		//The index number of the client
+		private int no = 1; 		//The index number of the client
 
-        	public Handler(Socket connection, int no) {
+        	public Handler(Socket connection) {
             		this.connection = connection;
 	    		this.no = no;
         	}
